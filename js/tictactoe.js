@@ -1,11 +1,11 @@
 "use strict"
 const playerFactory = (symbol) => {
   const score = 0;
-  return {score, symbol};
+  return { score, symbol };
 };
 
 
-const displayController = (() => { 
+const displayController = (() => {
 
   const displayTile = (tile, symbol) => {
     tile.textContent = symbol;
@@ -14,14 +14,14 @@ const displayController = (() => {
   const resetDisplay = () => {
     console.log("test");
   };
- 
+
   return {
     displayTile
   }
 })();
 
 const gameBoard = (() => {
-  const board = [[...Array(3)],[...Array(3)],[...Array(3)]];
+  const board = [[...Array(3)], [...Array(3)], [...Array(3)]];
 
   const setBoardTile = (row, col, symbol) => {
     board[row][col] = symbol;
@@ -31,32 +31,46 @@ const gameBoard = (() => {
     return board[row][col];
   };
 
-  const addTileListener = (symbol) => {
-    window.addEventListener("click", (event) => {
-      if(event.target.className === "tile") {
-        let row = event.target.getAttribute("data-row");
-        let col = event.target.getAttribute("data-col");
-        setBoardTile(row, col, symbol);
-        displayController.displayTile(event.target, symbol);
-      }
-    });
-  }
-
-
   return {
-    //addTileListeners,
-    addTileListener,
+    setBoardTile,
     getBoardTile
   };
 })();
 
 const game = (() => {
-  let playerTurn;
+  const players = [];
+  let currentTurnIndex;
   const init = () => {
-    gameBoard.addTileListener("X");
+    players.push(playerFactory("X"), playerFactory("O"));
+    currentTurnIndex = 0;
+    addTileListener();
   }
+
+  const getCurrentTurnSymbol = () => {
+    return players[currentTurnIndex].symbol;
+  }
+
+  const toggleTurnIndex = () => {
+    return currentTurnIndex === 0 ? 1 : 0;
+  }
+
+  const addTileListener = () => {
+    window.addEventListener("click", (event) => {
+      if (event.target.className === "tile") {
+        let symbol = getCurrentTurnSymbol();
+        const row = event.target.getAttribute("data-row");
+        const col = event.target.getAttribute("data-col");
+        gameBoard.setBoardTile(row, col, symbol);
+        displayController.displayTile(event.target, symbol);
+        currentTurnIndex = toggleTurnIndex();
+      }
+    });
+  }
+
   return {
-    init
+    init,
+    toggleTurnIndex,
+    getCurrentTurnSymbol
   }
 })();
 
