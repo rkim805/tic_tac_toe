@@ -37,41 +37,52 @@ const gameBoard = (() => {
   };
 })();
 
-const game = (() => {
+const gameLogic = (() => {
   const players = [];
   let currentTurnIndex;
+  let gameOver = false;
   const init = () => {
     players.push(playerFactory("X"), playerFactory("O"));
     currentTurnIndex = 0;
     addTileListener();
   }
 
-  const getCurrentTurnSymbol = () => {
+  const _getCurrentTurnSymbol = () => {
     return players[currentTurnIndex].symbol;
   }
 
-  const toggleTurnIndex = () => {
+  const _toggleTurnIndex = () => {
     return currentTurnIndex === 0 ? 1 : 0;
   }
-
+  
+  /**
+   * addTileListener()
+   * 
+   * Uses event bubbling to listen to all clicks -- handles when clicks are
+   * of .tile class. Uses less listeners than binding to each individual tile.
+   * 
+   * Function will then update the board array, display the symbol in the
+   * clicked tile, and toggle the turn to be the other player's turn.
+   */
   const addTileListener = () => {
-    window.addEventListener("click", (event) => {
-      if (event.target.className === "tile") {
-        let symbol = getCurrentTurnSymbol();
-        const row = event.target.getAttribute("data-row");
-        const col = event.target.getAttribute("data-col");
-        gameBoard.setBoardTile(row, col, symbol);
-        displayController.displayTile(event.target, symbol);
-        currentTurnIndex = toggleTurnIndex();
-      }
-    });
+    window.addEventListener("click", handleTileClick);
+  }
+
+  const handleTileClick = (event) => {
+    if (event.target.className === "tile" && event.target.textContent == "" &&
+    !gameOver) {
+      const symbol = _getCurrentTurnSymbol();
+      const row = event.target.getAttribute("data-row");
+      const col = event.target.getAttribute("data-col");
+      gameBoard.setBoardTile(row, col, symbol);
+      displayController.displayTile(event.target, symbol);
+      currentTurnIndex = _toggleTurnIndex();
+    }
   }
 
   return {
-    init,
-    toggleTurnIndex,
-    getCurrentTurnSymbol
+    init
   }
 })();
 
-window.onload = game.init();
+window.onload = gameLogic.init();
