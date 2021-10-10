@@ -82,6 +82,10 @@ button:hover {
   font-weight: 900;
 }
 
+#close-btn:hover {
+  cursor: pointer;
+}
+
 #submit-btn {
   color: white;
   background-color: rgb(94, 94, 197);

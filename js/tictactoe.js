@@ -23,19 +23,25 @@ const ticTacToe = (() => {
     }
 
     const resetDisplay = () => {
-      console.log("test");
+      const tiles = document.querySelectorAll(".tile");
+      tiles.forEach((tile)=> {
+        tile.textContent = "";
+      })
+      const display = document.querySelector("#game-status");
+      display.textContent = "";
     };
 
     return {
       displayTile,
       displayWinMessage,
-      displayTieMessage
+      displayTieMessage,
+      resetDisplay
     }
   })();
 
   const gameBoard = (() => {
     const GRID_SIZE = 3;
-    const board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
+    let board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
 
     const setBoardTile = (row, col, symbol) => {
       board[row][col] = symbol;
@@ -55,6 +61,10 @@ const ticTacToe = (() => {
       }
       return true;
     }
+
+    const resetBoard = () => {
+      board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
+    }
     
     const getGridSize = () => GRID_SIZE;
 
@@ -62,7 +72,8 @@ const ticTacToe = (() => {
       setBoardTile,
       getBoardTile,
       isBoardFull,
-      getGridSize
+      getGridSize,
+      resetBoard
     };
   })();
 
@@ -76,6 +87,8 @@ const ticTacToe = (() => {
         playerFactory("Player2", "O"));
 
       currentTurnIndex = 0;
+      let resetBtn = document.querySelector("#reset-btn");
+      resetBtn.addEventListener("click", _handleReset);
       window.addEventListener("click", handleTileClick);
       userInput.setFormPopUp();
       userInput.setCloseListeners();
@@ -119,7 +132,6 @@ const ticTacToe = (() => {
       }
 
       const _handleCloseButton = () => {
-        console.log("test");
         const form = document.querySelector("form");
         const modal = document.querySelector(".modal");
         modal.style.display = "none";
@@ -185,6 +197,12 @@ const ticTacToe = (() => {
         setSubmitListener,
       }
     })();
+
+    const _handleReset = () => {
+      displayController.resetDisplay();
+      gameBoard.resetBoard();
+      gameOver = false;
+    }
 
 
     /**
