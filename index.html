@@ -25,17 +25,20 @@
     <p id="game-status"> </p>
     <div class="modal">
       <form action="#" method="POST">
-        <label for="player-name">Player Nickname(Up to 14 characters)</label>
-        <br />
-        <input class="modal-input" type="text" name="player-name" 
-        placeholder="Player Name" pattern="[A-Za-z0-9]{1,14}" 
-        title="Up to 14 characters" required />
-        <br />
-        <label for="symbol">Symbol(One capitalized letter)</label>
-        <input class="modal-input" type="text" name="symbol" 
-        placeholder="Symbol" pattern="[A-Z]{1}" 
-        title="Only one capitalized character only" required/>
-        <button type="submit" id="submit-btn">Submit</button>
+        <span id="close-btn">&times;</span>
+        <fieldset>
+          <label for="player-name">Player Nickname(Up to 14 characters)</label>
+          <br />
+          <input class="modal-input" type="text" name="player-name" 
+          placeholder="Player Name" pattern="[A-Za-z0-9]{1,14}" 
+          title="Up to 14 characters" required />
+          <br />
+          <label for="symbol">Symbol(One capitalized letter)</label>
+          <input class="modal-input" type="text" name="symbol" 
+          placeholder="Symbol" pattern="[A-Z]{1}" 
+          title="Only one capitalized character only" required/>
+          <button type="submit" id="submit-btn">Submit</button>
+        </fieldset>
       </form>
     </div>
   </body>

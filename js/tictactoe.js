@@ -78,7 +78,7 @@ const ticTacToe = (() => {
       currentTurnIndex = 0;
       window.addEventListener("click", handleTileClick);
       userInput.setFormPopUp();
-      userInput.setFormModalClose();
+      userInput.setCloseListeners();
       userInput.setSubmitListener();
     }
 
@@ -102,16 +102,29 @@ const ticTacToe = (() => {
         player2Button.addEventListener("click", _displayModal);
       };
 
-      const setFormModalClose = () => {
-        window.addEventListener("click", (event) => {
+      const setCloseListeners = () => {
+        window.addEventListener("click", _closeModal);
+
+        const closeBtn = document.querySelector("#close-btn");
+        closeBtn.addEventListener("click", _handleCloseButton);
+      };
+
+      const _closeModal = (event) => {
           const form = document.querySelector("form");
           const modal = document.querySelector(".modal");
           if (event.target == modal) {
             modal.style.display = "none";
             form.reset();
           }
-        });
-      };
+      }
+
+      const _handleCloseButton = () => {
+        console.log("test");
+        const form = document.querySelector("form");
+        const modal = document.querySelector(".modal");
+        modal.style.display = "none";
+        form.reset();
+      }
 
       const setSubmitListener = () => {
         const submitBtn = document.querySelector("#submit-btn");
@@ -168,7 +181,7 @@ const ticTacToe = (() => {
 
       return {
         setFormPopUp,
-        setFormModalClose,
+        setCloseListeners,
         setSubmitListener,
       }
     })();

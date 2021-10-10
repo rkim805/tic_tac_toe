@@ -20,6 +20,7 @@ body {
   grid-template-rows: repeat(3, 1fr);
   border-color: red;
   border-width: 20px;
+  font-size: 100px;
 }
 
 .tile {
@@ -49,10 +50,45 @@ form {
   top: 50%;
   transform: translate(-50%, -50%);
 
+  height: 500px;
+  width: 300px;
+}
+
+fieldset {
   display: flex;
   flex-direction: column;
   align-items: center;
+  border: none;
+  margin-top: 40px;
+  font-size: 20px;
+}
 
-  height: 500px;
-  width: 300px;
+input[type="text"] {
+  padding: 16px;
+  border-radius: 10px;
+  font-size: 16px;
+  margin: 10px 0px;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+#close-btn {
+  float: right;
+  margin-right: 0.5rem;
+  color: lightgray;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+#submit-btn {
+  color: white;
+  background-color: rgb(94, 94, 197);
+  width: 200px;
+  height: 60px;
+  border-radius: 5px;
+  font-size: 36px;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  margin: 50px 0px;
 }
