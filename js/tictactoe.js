@@ -1,8 +1,8 @@
 "use strict"
-const ticTacToe = (() => {  
+const ticTacToe = (() => {
   const playerFactory = (name, symbol) => {
     const score = 0;
-    return { score, name, symbol};
+    return { score, name, symbol };
   };
 
 
@@ -12,9 +12,9 @@ const ticTacToe = (() => {
       tile.textContent = symbol;
     };
 
-    const displayWinMessage = (symbol) => {
+    const displayWinMessage = (name) => {
       const display = document.querySelector("#game-status");
-      display.textContent = `Congrats to Player ${symbol} on winning!!`;
+      display.textContent = `Congrats to ${name} on winning!!`;
     };
 
     const displayTieMessage = () => {
@@ -46,9 +46,9 @@ const ticTacToe = (() => {
     };
 
     const isBoardFull = () => {
-      for(let row = 0; row < board.length; row++) {
-        for(let col = 0; col < board[row].length; col++) {
-          if(board[row][col] == undefined) {
+      for (let row = 0; row < board.length; row++) {
+        for (let col = 0; col < board[row].length; col++) {
+          if (board[row][col] == undefined) {
             return false;
           }
         }
@@ -72,8 +72,8 @@ const ticTacToe = (() => {
     let gameOver = false;
 
     const init = () => {
-      players.push(playerFactory("Player 1", "X"), 
-      playerFactory("Player2","O"));
+      players.push(playerFactory("Player 1", "X"),
+        playerFactory("Player2", "O"));
 
       currentTurnIndex = 0;
       window.addEventListener("click", handleTileClick);
@@ -92,41 +92,77 @@ const ticTacToe = (() => {
 
     // module that contains functions that obtain and process user input
     const userInput = (() => {
+      //variable that contains which player name button was pressed
+      let inputButton;
       const setFormPopUp = () => {
-        const playerButton = document.querySelector("#player-1-btn");
-        playerButton.addEventListener("click", _displayModal);
+        const player1Button = document.querySelector("#player-1-btn");
+        player1Button.addEventListener("click", _displayModal);
+
+        const player2Button = document.querySelector("#player-2-btn");
+        player2Button.addEventListener("click", _displayModal);
       };
-  
+
       const setFormModalClose = () => {
         window.addEventListener("click", (event) => {
           const form = document.querySelector("form");
           const modal = document.querySelector(".modal");
-          if(event.target == modal) {
+          if (event.target == modal) {
             modal.style.display = "none";
             form.reset();
           }
         });
       };
-  
-      const setSubmitListener = (event) => {
+
+      const setSubmitListener = () => {
         const submitBtn = document.querySelector("#submit-btn");
         submitBtn.addEventListener("click", _handleSubmit);
       }
-  
+
       const _displayModal = (event) => {
         const modal = document.querySelector(".modal");
         modal.style.display = "block";
+        inputButton = event.target;
       };
-  
+
       const _handleSubmit = (event) => {
         event.preventDefault();
         const form = document.querySelector("form");
-  
-        // only submit if form is valid
-        if(form.reportValidity()) {
-          const form = document.querySelector("form");
-          modal.style.display = "none";
-          form.reset();
+        const modal = document.querySelector(".modal");
+
+        // only submit if form is valid(uses HTML5 form valdiation)
+        if (form.reportValidity()) {
+          const formData = new FormData(form);
+          const name = formData.get("player-name");
+          const symbol = formData.get("symbol");
+
+          let duplicate;
+          let playerIndex;
+          if (inputButton.id === "player-1-btn") {
+            playerIndex = 0;
+          }
+          else {
+            playerIndex = 1;
+          }
+          duplicate = checkDuplicateSymbols(playerIndex, symbol);
+
+          //if no duplicates, update player info and close form
+          if(!duplicate) {
+            players[playerIndex] = playerFactory(name, symbol);
+            modal.style.display = "none";
+            form.reset();
+          }
+        }
+      }
+
+      function checkDuplicateSymbols(playerIndex, symbol) {
+        // index of the other player in players[]
+        let altIndex = (playerIndex === 0) ? 1 : 0;
+        if(players[altIndex].symbol === symbol) {
+          alert(`${players[altIndex].name} is already using this symbol!`);
+          return true;
+        }
+        else {
+          return false;
         }
       }
 
@@ -136,8 +172,8 @@ const ticTacToe = (() => {
         setSubmitListener,
       }
     })();
-  
-    
+
+
     /**
      * handleTileClick() -
      * Handler when a .tile class element is clicked.
@@ -150,7 +186,7 @@ const ticTacToe = (() => {
      */
     const handleTileClick = (event) => {
       if (event.target.className === "tile" && event.target.textContent == "" &&
-      !gameOver) {
+        !gameOver) {
         const symbol = _getCurrentTurnSymbol();
         const row = event.target.getAttribute("data-row");
         const col = event.target.getAttribute("data-col");
@@ -158,12 +194,12 @@ const ticTacToe = (() => {
         gameBoard.setBoardTile(row, col, symbol);
         displayController.displayTile(event.target, symbol);
         let checkResult = _checkForWin();
-        if(checkResult) {
+        if (checkResult) {
           displayController.displayWinMessage(checkResult);
           gameOver = true;
         }
         //tie condition
-        else if(gameBoard.isBoardFull()) {
+        else if (gameBoard.isBoardFull()) {
           displayController.displayTieMessage();
           gameOver = true;
         }
@@ -173,19 +209,19 @@ const ticTacToe = (() => {
 
     const _checkForWin = () => {
       const rowResult = _checkRowsForWin();
-      if(rowResult) {
+      if (rowResult) {
         return rowResult;
       }
       const colResult = _checkColsForWin();
-      if(colResult) {
+      if (colResult) {
         return colResult;
       }
       const declineDiagResult = _checkDeclineDiagonal();
-      if(declineDiagResult) {
+      if (declineDiagResult) {
         return declineDiagResult;
       }
       const inclineDiagResult = _checkInclineDiagonal();
-      if(inclineDiagResult) {
+      if (inclineDiagResult) {
         return inclineDiagResult;
       }
       else {
@@ -194,7 +230,7 @@ const ticTacToe = (() => {
     }
 
     const _checkIfSetWins = (set) => {
-      if(set.includes(undefined)) {
+      if (set.includes(undefined)) {
         return false;
       }
       //check if every element in a checked array is the same
@@ -205,17 +241,17 @@ const ticTacToe = (() => {
      * Function that iterates through each row of the board,
      * and sees if there are 3 of the same symbol in a row.
      * 
-     * @return symbol -- symbol with 3 in a row
-     *         false  -- if no rows with 3 in a row
+     * @return _getPlayerName(checkedSet[0]) -- name of player who won
+     *         false  -- if diagonal is not 3 in a row
      */
     const _checkRowsForWin = () => {
       const checkedSet = Array(3);
-      for(let row = 0; row < ROW_SIZE; row++) {
-        for(let col = 0; col < COL_SIZE; col++) {
+      for (let row = 0; row < ROW_SIZE; row++) {
+        for (let col = 0; col < COL_SIZE; col++) {
           checkedSet[col] = gameBoard.getBoardTile(row, col);
         }
-        if(_checkIfSetWins(checkedSet)) {
-          return checkedSet[0];
+        if (_checkIfSetWins(checkedSet)) {
+          return _getPlayerName(checkedSet[0]);
         }
       }
       return false;
@@ -226,17 +262,17 @@ const ticTacToe = (() => {
      * Function that iterates through each column of the board,
      * and sees if there are 3 of the same symbol in a row.
      * 
-     * @return symbol -- symbol with 3 in a row
-     *         false  -- if no columns with 3 in a row
+     * @return _getPlayerName(checkedSet[0]) -- name of player who won
+     *         false  -- if diagonal is not 3 in a row
      */
     const _checkColsForWin = () => {
       const checkedSet = Array(3);
-      for(let col = 0; col < ROW_SIZE; col++) {
-        for(let row = 0; row < COL_SIZE; row++) {
+      for (let col = 0; col < ROW_SIZE; col++) {
+        for (let row = 0; row < COL_SIZE; row++) {
           checkedSet[row] = gameBoard.getBoardTile(row, col);
         }
-        if(_checkIfSetWins(checkedSet)) {
-          return checkedSet[0];
+        if (_checkIfSetWins(checkedSet)) {
+          return _getPlayerName(checkedSet[0]);
         }
       }
       return false;
@@ -248,40 +284,48 @@ const ticTacToe = (() => {
      * board to the bottom right, to see if it is 3 of the same symbols in a
      * row.
      * 
-     * @return symbol -- symbol with 3 in a row
+     * @return _getPlayerName(checkedSet[0]) -- name of player who won
      *         false  -- if diagonal is not 3 in a row
      */
     const _checkDeclineDiagonal = () => {
       const checkedSet = Array(3);
-      for(let diag = 0; diag < ROW_SIZE; diag++) {
+      for (let diag = 0; diag < ROW_SIZE; diag++) {
         checkedSet[diag] = gameBoard.getBoardTile(diag, diag);
-      }      
-      if(_checkIfSetWins(checkedSet)) {
-        return checkedSet[0];
+      }
+      if (_checkIfSetWins(checkedSet)) {
+        return _getPlayerName(checkedSet[0]);
       }
       return false;
     }
-    
+
     /**
      * _checkDeclineDiagonal
      * Function that checks the diagonal that goes from the bottom left of the
      * board to the top right, to see if it is 3 of the same symbols in a
      * row.
      * 
-     * @return symbol -- symbol with 3 in a row
+     * @return _getPlayerName(checkedSet[0]) -- name of player who won
      *         false  -- if diagonal is not 3 in a row
      */
     const _checkInclineDiagonal = () => {
       let col = 0;
       const checkedSet = Array(3);
-      for(let row = ROW_SIZE - 1; row >= 0; row--) {
+      for (let row = ROW_SIZE - 1; row >= 0; row--) {
         checkedSet[col] = gameBoard.getBoardTile(row, col);
         col++;
       }
-      if(_checkIfSetWins(checkedSet)) {
-        return checkedSet[0];
+      if (_checkIfSetWins(checkedSet)) {
+        return _getPlayerName(checkedSet[0]);
       }
       return false;
+    }
+
+    const _getPlayerName = (symbol) => {
+      for(let i = 0; i , players.length; i++) {
+        if(players[i].symbol === symbol) {
+          return players[i].name;
+        }
+      }
     }
 
     return {
