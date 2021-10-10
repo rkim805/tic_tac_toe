@@ -1,8 +1,8 @@
 "use strict"
 const ticTacToe = (() => {  
-  const playerFactory = (symbol) => {
+  const playerFactory = (name, symbol) => {
     const score = 0;
-    return { score, symbol };
+    return { score, name, symbol};
   };
 
 
@@ -35,8 +35,7 @@ const ticTacToe = (() => {
 
   const gameBoard = (() => {
     const ROW_SIZE = 3;
-    const board = [[...Array(ROW_SIZE)], [...Array(ROW_SIZE)], 
-      [...Array(ROW_SIZE)]];
+    const board = [Array(ROW_SIZE), Array(ROW_SIZE), Array(ROW_SIZE)];
 
     const setBoardTile = (row, col, symbol) => {
       board[row][col] = symbol;
@@ -73,9 +72,14 @@ const ticTacToe = (() => {
     let gameOver = false;
 
     const init = () => {
-      players.push(playerFactory("X"), playerFactory("O"));
+      players.push(playerFactory("Player 1", "X"), 
+      playerFactory("Player2","O"));
+
       currentTurnIndex = 0;
       window.addEventListener("click", handleTileClick);
+      userInput.setFormPopUp();
+      userInput.setFormModalClose();
+      userInput.setSubmitListener();
     }
 
     const _getCurrentTurnSymbol = () => {
@@ -85,6 +89,54 @@ const ticTacToe = (() => {
     const _toggleTurnIndex = () => {
       return currentTurnIndex === 0 ? 1 : 0;
     }
+
+    // module that contains functions that obtain and process user input
+    const userInput = (() => {
+      const setFormPopUp = () => {
+        const playerButton = document.querySelector("#player-1-btn");
+        playerButton.addEventListener("click", _displayModal);
+      };
+  
+      const setFormModalClose = () => {
+        window.addEventListener("click", (event) => {
+          const form = document.querySelector("form");
+          const modal = document.querySelector(".modal");
+          if(event.target == modal) {
+            modal.style.display = "none";
+            form.reset();
+          }
+        });
+      };
+  
+      const setSubmitListener = (event) => {
+        const submitBtn = document.querySelector("#submit-btn");
+        submitBtn.addEventListener("click", _handleSubmit);
+      }
+  
+      const _displayModal = (event) => {
+        const modal = document.querySelector(".modal");
+        modal.style.display = "block";
+      };
+  
+      const _handleSubmit = (event) => {
+        event.preventDefault();
+        const form = document.querySelector("form");
+  
+        // only submit if form is valid
+        if(form.reportValidity()) {
+          const form = document.querySelector("form");
+          modal.style.display = "none";
+          form.reset();
+        }
+      }
+
+      return {
+        setFormPopUp,
+        setFormModalClose,
+        setSubmitListener,
+      }
+    })();
+  
     
     /**
      * handleTileClick() -
@@ -110,6 +162,7 @@ const ticTacToe = (() => {
           displayController.displayWinMessage(checkResult);
           gameOver = true;
         }
+        //tie condition
         else if(gameBoard.isBoardFull()) {
           displayController.displayTieMessage();
           gameOver = true;
@@ -196,7 +249,7 @@ const ticTacToe = (() => {
      * row.
      * 
      * @return symbol -- symbol with 3 in a row
-     *         false  -- if no columns with 3 in a row
+     *         false  -- if diagonal is not 3 in a row
      */
     const _checkDeclineDiagonal = () => {
       const checkedSet = Array(3);
@@ -216,7 +269,7 @@ const ticTacToe = (() => {
      * row.
      * 
      * @return symbol -- symbol with 3 in a row
-     *         false  -- if no columns with 3 in a row
+     *         false  -- if diagonal is not 3 in a row
      */
     const _checkInclineDiagonal = () => {
       let col = 0;

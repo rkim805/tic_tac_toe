@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="css/style.css">
   </head>
   <body>
+    <div id="name-button-container">
+      <button id="player-1-btn">Set Player 1 Name</button>
+      <button id="player-2-btn">Set Player 2 Name</button>
+    </div>
     <div id="grid-container">
       <div class="tile" data-row="0" data-col="0"></div>
       <div class="tile" data-row="0" data-col="1"></div>
@@ -19,5 +23,15 @@
       <div class="tile" data-row="2" data-col="2"></div>
     </div>
     <p id="game-status"> </p>
+    <div class="modal">
+      <form action="#" method="POST">
+        <label for="player-name">Player Nickname(Up to 14 characters)</label>
+        <br />
+        <input type="text" name="player-name" 
+        placeholder="Player Name" pattern="[A-Za-z0-9]{1,14}"
+        title="Up to 14 characters" required />
+        <button type="submit" id="submit-btn">Submit</button>
+      </form>
+    </div>
   </body>
 </html>

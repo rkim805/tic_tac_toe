@@ -18,6 +18,8 @@ body {
   height: 500px;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
+  border-color: red;
+  border-width: 20px;
 }
 
 .tile {
@@ -26,4 +28,31 @@ body {
   justify-content: center;
   border: solid;
   border-width: 2px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+form { 
+  position: absolute;
+  background-color: white;
+
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  height: 500px;
+  width: 300px;
 }
