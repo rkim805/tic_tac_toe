@@ -34,8 +34,8 @@ const ticTacToe = (() => {
   })();
 
   const gameBoard = (() => {
-    const ROW_SIZE = 3;
-    const board = [Array(ROW_SIZE), Array(ROW_SIZE), Array(ROW_SIZE)];
+    const GRID_SIZE = 3;
+    const board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
 
     const setBoardTile = (row, col, symbol) => {
       board[row][col] = symbol;
@@ -55,18 +55,18 @@ const ticTacToe = (() => {
       }
       return true;
     }
+    
+    const getGridSize = () => GRID_SIZE;
 
     return {
       setBoardTile,
       getBoardTile,
-      isBoardFull
+      isBoardFull,
+      getGridSize
     };
   })();
 
   const gameLogic = (() => {
-    const ROW_SIZE = 3;
-    const COL_SIZE = 3;
-
     const players = [];
     let currentTurnIndex;
     let gameOver = false;
@@ -259,8 +259,9 @@ const ticTacToe = (() => {
      */
     const _checkRowsForWin = () => {
       const checkedSet = Array(3);
-      for (let row = 0; row < ROW_SIZE; row++) {
-        for (let col = 0; col < COL_SIZE; col++) {
+      const GRID_SIZE = gameBoard.getGridSize();
+      for (let row = 0; row < GRID_SIZE; row++) {
+        for (let col = 0; col < GRID_SIZE; col++) {
           checkedSet[col] = gameBoard.getBoardTile(row, col);
         }
         if (_checkIfSetWins(checkedSet)) {
@@ -280,8 +281,9 @@ const ticTacToe = (() => {
      */
     const _checkColsForWin = () => {
       const checkedSet = Array(3);
-      for (let col = 0; col < ROW_SIZE; col++) {
-        for (let row = 0; row < COL_SIZE; row++) {
+      const GRID_SIZE = gameBoard.getGridSize();
+      for (let col = 0; col < GRID_SIZE; col++) {
+        for (let row = 0; row < GRID_SIZE; row++) {
           checkedSet[row] = gameBoard.getBoardTile(row, col);
         }
         if (_checkIfSetWins(checkedSet)) {
@@ -301,8 +303,9 @@ const ticTacToe = (() => {
      *         false  -- if diagonal is not 3 in a row
      */
     const _checkDeclineDiagonal = () => {
-      const checkedSet = Array(3);
-      for (let diag = 0; diag < ROW_SIZE; diag++) {
+      const GRID_SIZE = gameBoard.getGridSize();
+      const checkedSet = Array(GRID_SIZE);
+      for (let diag = 0; diag < GRID_SIZE; diag++) {
         checkedSet[diag] = gameBoard.getBoardTile(diag, diag);
       }
       if (_checkIfSetWins(checkedSet)) {
@@ -322,8 +325,9 @@ const ticTacToe = (() => {
      */
     const _checkInclineDiagonal = () => {
       let col = 0;
-      const checkedSet = Array(3);
-      for (let row = ROW_SIZE - 1; row >= 0; row--) {
+      const GRID_SIZE = gameBoard.getGridSize();
+      const checkedSet = Array(GRID_SIZE);
+      for (let row = GRID_SIZE - 1; row >= 0; row--) {
         checkedSet[col] = gameBoard.getBoardTile(row, col);
         col++;
       }
