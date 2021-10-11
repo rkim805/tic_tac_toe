@@ -80,15 +80,19 @@ const ticTacToe = (() => {
   const gameLogic = (() => {
     const players = [];
     let currentTurnIndex;
-    let gameOver = false;
+    let gameOver;
 
     const init = () => {
       players.push(playerFactory("Player 1", "X"),
         playerFactory("Player2", "O"));
 
       currentTurnIndex = 0;
+      gameOver = true;
+
       let resetBtn = document.querySelector("#reset-btn");
+      let startBtn = document.querySelector("#start-btn");
       resetBtn.addEventListener("click", _handleReset);
+      startBtn.addEventListener("click", _handleStart);
       window.addEventListener("click", handleTileClick);
       userInput.setFormPopUp();
       userInput.setCloseListeners();
@@ -191,17 +195,52 @@ const ticTacToe = (() => {
         }
       }
 
+      const disableInput = () => {
+        const player1Button = document.querySelector("#player-1-btn");
+        const player2Button = document.querySelector("#player-2-btn");
+        player1Button.disabled = true;
+        player2Button.disabled = true;
+      }
+
+      const enableInput = () => {
+        const player1Button = document.querySelector("#player-1-btn");
+        const player2Button = document.querySelector("#player-2-btn");
+        player1Button.disabled = false;
+        player2Button.disabled = false;
+      }
+
       return {
         setFormPopUp,
         setCloseListeners,
         setSubmitListener,
+        enableInput,
+        disableInput
       }
     })();
 
     const _handleReset = () => {
       displayController.resetDisplay();
       gameBoard.resetBoard();
+      userInput.enableInput();
+      _enableStartBtn();
+
+      //game should not start until start button pressed
+      gameOver = true;
+    }
+
+    const _handleStart = () => {
       gameOver = false;
+      userInput.disableInput();
+    }
+
+    const _disableStartBtn = () => {
+      let startButton = document.querySelector("#start-btn");
+      startButton.disabled = true;
+    }
+
+    const _enableStartBtn = () => {
+      let startButton = document.querySelector("#start-btn");
+      startButton.disabled = false;
     }
 
 
@@ -228,11 +267,13 @@ const ticTacToe = (() => {
         if (checkResult) {
           displayController.displayWinMessage(checkResult);
           gameOver = true;
+          _disableStartBtn();
         }
         //tie condition
         else if (gameBoard.isBoardFull()) {
           displayController.displayTieMessage();
           gameOver = true;
+          _disableStartBtn();
         }
         currentTurnIndex = _toggleTurnIndex();
       }
