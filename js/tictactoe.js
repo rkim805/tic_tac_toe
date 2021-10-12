@@ -39,43 +39,149 @@ const ticTacToe = (() => {
     }
   })();
 
-  const gameBoard = (() => {
-    const GRID_SIZE = 3;
-    let board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
+  // module that contains functions that obtain and process user input
+  const userInput = (() => {
+    //variable that contains which player name button was pressed
+    let inputButton;
 
-    const setBoardTile = (row, col, symbol) => {
-      board[row][col] = symbol;
+    const setFormPopUp = () => {
+      const player1Button = document.querySelector("#player-1-btn");
+      player1Button.addEventListener("click", _displayModal);
+
+      const player2Button = document.querySelector("#player-2-btn");
+      player2Button.addEventListener("click", _displayModal);
     };
 
-    const getBoardTile = (row, col) => {
-      return board[row][col];
+    const setCloseListeners = () => {
+      window.addEventListener("click", _closeModal);
+
+      const closeBtn = document.querySelector("#close-btn");
+      closeBtn.addEventListener("click", _handleCloseButton);
     };
 
-    const isBoardFull = () => {
-      for (let row = 0; row < board.length; row++) {
-        for (let col = 0; col < board[row].length; col++) {
-          if (board[row][col] == undefined) {
-            return false;
-          }
+    const _closeModal = (event) => {
+        const form = document.querySelector("form");
+        const modal = document.querySelector(".modal");
+        if (event.target == modal) {
+          modal.style.display = "none";
+          form.reset();
+        }
+    }
+
+    const _handleCloseButton = () => {
+      const form = document.querySelector("form");
+      const modal = document.querySelector(".modal");
+      modal.style.display = "none";
+      form.reset();
+    }
+
+    const setSubmitListener = () => {
+      const submitBtn = document.querySelector("#submit-btn");
+      submitBtn.addEventListener("click", _handleSubmit);
+    }
+
+    const _displayModal = (event) => {
+      const modal = document.querySelector(".modal");
+      modal.style.display = "block";
+      inputButton = event.target;
+    };
+
+    const _handleSubmit = (event) => {
+      event.preventDefault();
+      const form = document.querySelector("form");
+      const modal = document.querySelector(".modal");
+
+      // only submit if form is valid(uses HTML5 form valdiation)
+      if (form.reportValidity()) {
+        const formData = new FormData(form);
+        const name = formData.get("player-name");
+        const symbol = formData.get("symbol");
+
+        let duplicate;
+        let playerIndex = inputButton.id === "player-1-btn" ? 0 : 1;
+        duplicate = _checkDuplicateSymbols(playerIndex, symbol);
+
+        //if no duplicates, update player info and close form
+        if(!duplicate) {
+          gameLogic.setPlayer(playerIndex, playerFactory(name, symbol));
+          modal.style.display = "none";
+          form.reset();
         }
       }
-      return true;
     }
 
-    const resetBoard = () => {
-      board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
+    function _checkDuplicateSymbols(playerIndex, symbol) {
+      // index of the other player in players[]
+      let altIndex = (playerIndex === 0) ? 1 : 0;
+      if(players[altIndex].symbol === symbol) {
+        alert(`${players[altIndex].name} is already using this symbol!`);
+        return true;
+      }
+      else {
+        return false;
+      }
     }
-    
-    const getGridSize = () => GRID_SIZE;
+
+    const disableInput = () => {
+      const player1Button = document.querySelector("#player-1-btn");
+      const player2Button = document.querySelector("#player-2-btn");
+      player1Button.disabled = true;
+      player2Button.disabled = true;
+    }
+
+    const enableInput = () => {
+      const player1Button = document.querySelector("#player-1-btn");
+      const player2Button = document.querySelector("#player-2-btn");
+      player1Button.disabled = false;
+      player2Button.disabled = false;
+    }
 
     return {
-      setBoardTile,
-      getBoardTile,
-      isBoardFull,
-      getGridSize,
-      resetBoard
-    };
+      setFormPopUp,
+      setCloseListeners,
+      setSubmitListener,
+      enableInput,
+      disableInput
+    }
   })();
+
+const gameBoard = (() => {
+  const GRID_SIZE = 3;
+  let board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
+
+  const setBoardTile = (row, col, symbol) => {
+    board[row][col] = symbol;
+  };
+
+  const getBoardTile = (row, col) => {
+    return board[row][col];
+  };
+
+  const isBoardFull = () => {
+    for (let row = 0; row < board.length; row++) {
+      for (let col = 0; col < board[row].length; col++) {
+        if (board[row][col] == undefined) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  const resetBoard = () => {
+    board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
+  }
+  
+  const getGridSize = () => GRID_SIZE;
+
+  return {
+    setBoardTile,
+    getBoardTile,
+    isBoardFull,
+    getGridSize,
+    resetBoard
+  };
+})();
 
   const gameLogic = (() => {
     const players = [];
@@ -106,117 +212,6 @@ const ticTacToe = (() => {
     const _toggleTurnIndex = () => {
       return currentTurnIndex === 0 ? 1 : 0;
     }
-
-    // module that contains functions that obtain and process user input
-    const userInput = (() => {
-      //variable that contains which player name button was pressed
-      let inputButton;
-      const setFormPopUp = () => {
-        const player1Button = document.querySelector("#player-1-btn");
-        player1Button.addEventListener("click", _displayModal);
-
-        const player2Button = document.querySelector("#player-2-btn");
-        player2Button.addEventListener("click", _displayModal);
-      };
-
-      const setCloseListeners = () => {
-        window.addEventListener("click", _closeModal);
-
-        const closeBtn = document.querySelector("#close-btn");
-        closeBtn.addEventListener("click", _handleCloseButton);
-      };
-
-      const _closeModal = (event) => {
-          const form = document.querySelector("form");
-          const modal = document.querySelector(".modal");
-          if (event.target == modal) {
-            modal.style.display = "none";
-            form.reset();
-          }
-      }
-
-      const _handleCloseButton = () => {
-        const form = document.querySelector("form");
-        const modal = document.querySelector(".modal");
-        modal.style.display = "none";
-        form.reset();
-      }
-
-      const setSubmitListener = () => {
-        const submitBtn = document.querySelector("#submit-btn");
-        submitBtn.addEventListener("click", _handleSubmit);
-      }
-
-      const _displayModal = (event) => {
-        const modal = document.querySelector(".modal");
-        modal.style.display = "block";
-        inputButton = event.target;
-      };
-
-      const _handleSubmit = (event) => {
-        event.preventDefault();
-        const form = document.querySelector("form");
-        const modal = document.querySelector(".modal");
-
-        // only submit if form is valid(uses HTML5 form valdiation)
-        if (form.reportValidity()) {
-          const formData = new FormData(form);
-          const name = formData.get("player-name");
-          const symbol = formData.get("symbol");
-
-          let duplicate;
-          let playerIndex;
-          if (inputButton.id === "player-1-btn") {
-            playerIndex = 0;
-          }
-          else {
-            playerIndex = 1;
-          }
-          duplicate = _checkDuplicateSymbols(playerIndex, symbol);
-
-          //if no duplicates, update player info and close form
-          if(!duplicate) {
-            players[playerIndex] = playerFactory(name, symbol);
-            modal.style.display = "none";
-            form.reset();
-          }
-        }
-      }
-
-      function _checkDuplicateSymbols(playerIndex, symbol) {
-        // index of the other player in players[]
-        let altIndex = (playerIndex === 0) ? 1 : 0;
-        if(players[altIndex].symbol === symbol) {
-          alert(`${players[altIndex].name} is already using this symbol!`);
-          return true;
-        }
-        else {
-          return false;
-        }
-      }
-
-      const disableInput = () => {
-        const player1Button = document.querySelector("#player-1-btn");
-        const player2Button = document.querySelector("#player-2-btn");
-        player1Button.disabled = true;
-        player2Button.disabled = true;
-      }
-
-      const enableInput = () => {
-        const player1Button = document.querySelector("#player-1-btn");
-        const player2Button = document.querySelector("#player-2-btn");
-        player1Button.disabled = false;
-        player2Button.disabled = false;
-      }
-
-      return {
-        setFormPopUp,
-        setCloseListeners,
-        setSubmitListener,
-        enableInput,
-        disableInput
-      }
-    })();
 
     const _handleReset = () => {
       displayController.resetDisplay();
@@ -279,6 +274,10 @@ const ticTacToe = (() => {
       }
     }
 
+    const setPlayer = (index, player) => {
+      players[index] = player;
+    }
+
     const _checkForWin = () => {
       const rowResult = _checkRowsForWin();
       if (rowResult) {
@@ -301,13 +300,13 @@ const ticTacToe = (() => {
       }
     }
 
-    const _checkIfSetWins = (set) => {
-      if (set.includes(undefined)) {
-        return false;
+      const _checkIfSetWins = (set) => {
+        if (set.includes(undefined)) {
+          return false;
+        }
+        //check if every element in a checked array is the same
+        return set.every(elem => elem === set[0]);
       }
-      //check if every element in a checked array is the same
-      return set.every(elem => elem === set[0]);
-    }
 
     /**_checkRowsForWin()
      * Function that iterates through each row of the board,
@@ -405,7 +404,8 @@ const ticTacToe = (() => {
     }
 
     return {
-      init
+      init,
+      setPlayer
     }
   })();
 
