@@ -1,8 +1,8 @@
 "use strict"
 const ticTacToe = (() => {
-  const playerFactory = (name, symbol) => {
+  const playerFactory = (name, symbol, computer) => {
     const score = 0;
-    return { score, name, symbol };
+    return { score, name, symbol, computer};
   };
 
 
@@ -105,7 +105,7 @@ const ticTacToe = (() => {
         }
         //if no duplicates, update player info and close form
         else {
-          gameLogic.setPlayer(playerIndex, playerFactory(name, symbol));
+          gameLogic.setPlayer(playerIndex, playerFactory(name, symbol, false));
           modal.style.display = "none";
           form.reset();
         }
@@ -179,8 +179,8 @@ const gameBoard = (() => {
     let gameOver;
 
     const init = () => {
-      players.push(playerFactory("Player 1", "X"),
-        playerFactory("Player2", "O"));
+      players.push(playerFactory("Player 1", "X", false),
+        playerFactory("Player2", "O", false));
 
       currentTurnIndex = 0;
       gameOver = true;
@@ -193,13 +193,14 @@ const gameBoard = (() => {
       userInput.setFormPopUp();
       userInput.setCloseListeners();
       userInput.setSubmitListener();
+      gameSettings.setSettingListeners();
     }
 
     const _getCurrentTurnSymbol = () => {
       return players[currentTurnIndex].symbol;
     }
 
-    const _toggleTurnIndex = () => {
+    const toggleTurnIndex = () => {
       return currentTurnIndex === 0 ? 1 : 0;
     }
 
@@ -250,7 +251,6 @@ const gameBoard = (() => {
       }
     }
 
-
     /**
      * handleTileClick() -
      * Handler when a .tile class element is clicked.
@@ -282,12 +282,16 @@ const gameBoard = (() => {
           gameOver = true;
           _disableStartBtn();
         }
-        currentTurnIndex = _toggleTurnIndex();
+        currentTurnIndex = toggleTurnIndex();
       }
     }
 
     const setPlayer = (index, player) => {
       players[index] = player;
+    }
+
+    const setComputerPlayer = (bool) => {
+      players[1].computer = bool;
     }
 
     const _checkForWin = () => {
@@ -418,7 +422,38 @@ const gameBoard = (() => {
     return {
       init,
       setPlayer,
-      checkDuplicateSymbols
+      checkDuplicateSymbols,
+      toggleTurnIndex,
+      setComputerPlayer
+    }
+  })();
+
+  const gameSettings = (() => {
+    const setSettingListeners = () => {
+      const startButton = document.querySelector("#start-btn");
+      startButton.addEventListener("click", _handlePlayerType);
+      startButton.addEventListener("click", _handlePlayerTurn);
+    }
+    const _handlePlayerType = () => {
+      const computerInput = document.querySelector("#computer");
+      if(computerInput.checked) {
+        gameLogic.setComputerPlayer(true);
+      }
+      else {
+        gameLogic.setComputerPlayer(false);
+      }
+    };
+  
+    const _handlePlayerTurn = () => {
+      const firstTurnInput = document.querySelector("#first");
+      if(firstTurnInput.checked && !firstTurnInput.disabled) {
+        console.log(firstTurnInput.disabled);
+        //logic always starts at 0 in initial game state, toggle to set to 1
+        gameLogic.toggleTurnIndex();
+      }
+    }
+    return {
+      setSettingListeners
     }
   })();
 
@@ -426,6 +461,5 @@ const gameBoard = (() => {
     gameLogic
   }
 })();
-
 
 window.onload = ticTacToe.gameLogic.init();

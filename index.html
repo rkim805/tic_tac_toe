@@ -22,9 +22,21 @@
       <div class="tile" data-row="2" data-col="1"></div>
       <div class="tile" data-row="2" data-col="2"></div>
     </div>
-    <div id="settings-container">
+    <div id="state-container">
       <button id="start-btn">Start</button>
       <button id="reset-btn">Reset</button>
+    </div>
+    <div id="settings-container">
+      <p>Select your opponent:</p>
+      <input type="radio" name="altPlayerType" id="local" checked>
+      <label for="local">Local</label>
+      <input type="radio" name="altPlayerType" id="computer">
+      <label for="computer">Computer</label>
+      <br />
+      <input type="radio" name="playerTurn" id="first" checked disabled>
+      <label for="local">First</label>
+      <input type="radio" name="playerTurn" id="second" disabled>
+      <label for="computer">Second</label>
     </div>
     <p id="game-status"> </p>
     <div class="modal">
