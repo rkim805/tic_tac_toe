@@ -97,9 +97,8 @@ const ticTacToe = (() => {
         const name = formData.get("player-name");
         const symbol = formData.get("symbol");
 
-        let duplicate;
-        let playerIndex = inputButton.id === "player-1-btn" ? 0 : 1;
-        duplicate = _checkDuplicateSymbols(playerIndex, symbol);
+        const playerIndex = (inputButton.id === "player-1-btn") ? 0 : 1;
+        const duplicate = gameLogic.checkDuplicateSymbols(playerIndex, symbol);
 
         if(duplicate) {
           alert(`${players[altIndex].name} is already using this symbol!`);
@@ -110,26 +109,6 @@ const ticTacToe = (() => {
           modal.style.display = "none";
           form.reset();
         }
-      }
-    }
-
-    /**
-     * _checkDuplicateSymbols()
-     * This function is designed to check if the alternate player has the same
-     * symbol as the symbol passed in.
-     * @param {num} playerIndex -- index of player in gameLogic
-     * @param {String} symbol -- symbol to check duplicate of in other player
-     * @returns true -- if other player has the symbol
-     *          false -- other player does not have the symbol
-     */
-    function _checkDuplicateSymbols(playerIndex, symbol) {
-      // index of the alternate player
-      let altIndex = (playerIndex === 0) ? 1 : 0;
-      if(gameLogic.getPlayerSymbol(altIndex) === symbol) {
-        return true;
-      }
-      else {
-        return false;
       }
     }
 
@@ -232,6 +211,7 @@ const gameBoard = (() => {
 
       //game should not start until start button pressed
       gameOver = true;
+      currentTurnIndex = 0;
     }
 
     const _handleStart = () => {
@@ -250,8 +230,24 @@ const gameBoard = (() => {
     }
 
 
-    function getPlayerSymbol(playerIndex) {
-      return players[playerIndex].symbol;
+    /**
+     * checkDuplicateSymbols()
+     * This function is designed to check if the alternate player has the same
+     * symbol as the symbol passed in.
+     * @param {num} playerIndex -- index of player in gameLogic
+     * @param {String} symbol -- symbol to check duplicate of in other player
+     * @returns true -- if other player has the symbol
+     *          false -- other player does not have the symbol
+     */
+     function checkDuplicateSymbols(playerIndex, symbol) {
+      // index of the alternate player
+      let altIndex = (playerIndex === 0) ? 1 : 0;
+      if(players[altIndex].symbol === symbol) {
+        return true;
+      }
+      else {
+        return false;
+      }
     }
 
 
@@ -422,7 +418,7 @@ const gameBoard = (() => {
     return {
       init,
       setPlayer,
-      getPlayerSymbol
+      checkDuplicateSymbols
     }
   })();
 
