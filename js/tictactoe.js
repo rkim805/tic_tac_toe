@@ -101,8 +101,11 @@ const ticTacToe = (() => {
         let playerIndex = inputButton.id === "player-1-btn" ? 0 : 1;
         duplicate = _checkDuplicateSymbols(playerIndex, symbol);
 
+        if(duplicate) {
+          alert(`${players[altIndex].name} is already using this symbol!`);
+        }
         //if no duplicates, update player info and close form
-        if(!duplicate) {
+        else {
           gameLogic.setPlayer(playerIndex, playerFactory(name, symbol));
           modal.style.display = "none";
           form.reset();
@@ -110,11 +113,19 @@ const ticTacToe = (() => {
       }
     }
 
+    /**
+     * _checkDuplicateSymbols()
+     * This function is designed to check if the alternate player has the same
+     * symbol as the symbol passed in.
+     * @param {num} playerIndex -- index of player in gameLogic
+     * @param {String} symbol -- symbol to check duplicate of in other player
+     * @returns true -- if other player has the symbol
+     *          false -- other player does not have the symbol
+     */
     function _checkDuplicateSymbols(playerIndex, symbol) {
-      // index of the other player in players[]
+      // index of the alternate player
       let altIndex = (playerIndex === 0) ? 1 : 0;
-      if(players[altIndex].symbol === symbol) {
-        alert(`${players[altIndex].name} is already using this symbol!`);
+      if(gameLogic.getPlayerSymbol(altIndex) === symbol) {
         return true;
       }
       else {
@@ -199,7 +210,7 @@ const gameBoard = (() => {
       let startBtn = document.querySelector("#start-btn");
       resetBtn.addEventListener("click", _handleReset);
       startBtn.addEventListener("click", _handleStart);
-      window.addEventListener("click", handleTileClick);
+      window.addEventListener("click", _handleTileClick);
       userInput.setFormPopUp();
       userInput.setCloseListeners();
       userInput.setSubmitListener();
@@ -239,6 +250,11 @@ const gameBoard = (() => {
     }
 
 
+    function getPlayerSymbol(playerIndex) {
+      return players[playerIndex].symbol;
+    }
+
+
     /**
      * handleTileClick() -
      * Handler when a .tile class element is clicked.
@@ -249,7 +265,7 @@ const gameBoard = (() => {
      * 
      * @param {Object} event - Click event bubbled to window 
      */
-    const handleTileClick = (event) => {
+    const _handleTileClick = (event) => {
       if (event.target.className === "tile" && event.target.textContent == "" &&
         !gameOver) {
         const symbol = _getCurrentTurnSymbol();
@@ -300,13 +316,13 @@ const gameBoard = (() => {
       }
     }
 
-      const _checkIfSetWins = (set) => {
-        if (set.includes(undefined)) {
-          return false;
-        }
-        //check if every element in a checked array is the same
-        return set.every(elem => elem === set[0]);
+    const _checkIfSetWins = (set) => {
+      if (set.includes(undefined)) {
+        return false;
       }
+      //check if every element in a checked array is the same
+      return set.every(elem => elem === set[0]);
+    }
 
     /**_checkRowsForWin()
      * Function that iterates through each row of the board,
@@ -405,7 +421,8 @@ const gameBoard = (() => {
 
     return {
       init,
-      setPlayer
+      setPlayer,
+      getPlayerSymbol
     }
   })();
 
