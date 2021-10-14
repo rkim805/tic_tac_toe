@@ -98,14 +98,20 @@ const ticTacToe = (() => {
         const symbol = formData.get("symbol");
 
         const playerIndex = (inputButton.id === "player-1-btn") ? 0 : 1;
-        const duplicate = gameLogic.checkDuplicateSymbols(playerIndex, symbol);
+        const duplicate = gameState.checkDuplicateSymbols(playerIndex, symbol);
 
         if(duplicate) {
-          alert(`${players[altIndex].name} is already using this symbol!`);
+          alert(`${gameState.getPlayerName(symbol)} is already 
+          using this symbol!`);
         }
         //if no duplicates, update player info and close form
         else {
-          gameLogic.setPlayer(playerIndex, playerFactory(name, symbol, false));
+          if(playerIndex == 0) {
+            gameState.setPlayer1(playerFactory(name, symbol, false));
+          }
+          else {
+            gameState.setPlayer2(playerFactory(name, symbol, false));
+          }
           modal.style.display = "none";
           form.reset();
         }
@@ -135,101 +141,107 @@ const ticTacToe = (() => {
     }
   })();
 
-const gameBoard = (() => {
-  const GRID_SIZE = 3;
-  let board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
+  const gameBoard = (() => {
+    const GRID_SIZE = 3;
+    let board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
 
-  const setBoardTile = (row, col, symbol) => {
-    board[row][col] = symbol;
-  };
+    const setBoardTile = (row, col, symbol) => {
+      board[row][col] = symbol;
+    };
 
-  const getBoardTile = (row, col) => {
-    return board[row][col];
-  };
+    const getBoardTile = (row, col) => {
+      return board[row][col];
+    };
 
-  const isBoardFull = () => {
-    for (let row = 0; row < board.length; row++) {
-      for (let col = 0; col < board[row].length; col++) {
-        if (board[row][col] == undefined) {
-          return false;
+    const isBoardFull = () => {
+      for (let row = 0; row < board.length; row++) {
+        for (let col = 0; col < board[row].length; col++) {
+          if (board[row][col] == undefined) {
+            return false;
+          }
         }
       }
+      return true;
     }
-    return true;
-  }
 
-  const resetBoard = () => {
-    board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
-  }
-  
-  const getGridSize = () => GRID_SIZE;
+    const resetBoard = () => {
+      board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
+    }
+    
+    const getGridSize = () => GRID_SIZE;
 
-  return {
-    setBoardTile,
-    getBoardTile,
-    isBoardFull,
-    getGridSize,
-    resetBoard
-  };
-})();
+    return {
+      setBoardTile,
+      getBoardTile,
+      isBoardFull,
+      getGridSize,
+      resetBoard
+    };
+  })();
 
-  const gameLogic = (() => {
+  const gameState = (() => {
     const players = [];
     let currentTurnIndex;
     let gameOver;
 
-    const init = () => {
+    const initState = () => {
       players.push(playerFactory("Player 1", "X", false),
         playerFactory("Player2", "O", false));
-
-      currentTurnIndex = 0;
-      gameOver = true;
-
-      let resetBtn = document.querySelector("#reset-btn");
-      let startBtn = document.querySelector("#start-btn");
-      resetBtn.addEventListener("click", _handleReset);
-      startBtn.addEventListener("click", _handleStart);
-      window.addEventListener("click", _handleTileClick);
-      userInput.setFormPopUp();
-      userInput.setCloseListeners();
-      userInput.setSubmitListener();
-      gameSettings.setSettingListeners();
+        currentTurnIndex = 0;
+        gameOver = true;
     }
 
-    const _getCurrentTurnSymbol = () => {
-      return players[currentTurnIndex].symbol;
+    const setPlayer1 = (player) => {
+      players[0] = player;
+    }
+
+    const setPlayer2 = (player) => {
+      players[1] = player;
+    }
+
+    const _getPlayer = (index) => {
+      return players[index];
+    }
+
+    const getPlayerName = (symbol) => {
+      for(let i = 0; i , players.length; i++) {
+        if(players[i].symbol === symbol) {
+          return players[i].name;
+        }
+      }
+    }
+
+    const setComputerPlayer = (bool) => {
+      players[1].computer = bool;
     }
 
     const toggleTurnIndex = () => {
-      return currentTurnIndex === 0 ? 1 : 0;
+      currentTurnIndex = currentTurnIndex === 0 ? 1 : 0;
     }
 
-    const _handleReset = () => {
-      displayController.resetDisplay();
-      gameBoard.resetBoard();
-      userInput.enableInput();
-      _enableStartBtn();
-
-      //game should not start until start button pressed
-      gameOver = true;
+    const resetTurnIndex = () => {
       currentTurnIndex = 0;
     }
 
-    const _handleStart = () => {
+    const getCurrentTurnSymbol = () => {
+      return players[currentTurnIndex].symbol;
+    }
+
+    const getTurnIndex = () => {
+      return currentTurnIndex;
+    }
+
+    const endGame = () => {
+      gameOver = true;
+    }
+
+    const startGame = () => {
       gameOver = false;
-      userInput.disableInput();
     }
 
-    const _disableStartBtn = () => {
-      let startButton = document.querySelector("#start-btn");
-      startButton.disabled = true;
+    const getGameOverState = () => {
+      return gameOver;
     }
-
-    const _enableStartBtn = () => {
-      let startButton = document.querySelector("#start-btn");
-      startButton.disabled = false;
-    }
-
 
     /**
      * checkDuplicateSymbols()
@@ -242,13 +254,74 @@ const gameBoard = (() => {
      */
      function checkDuplicateSymbols(playerIndex, symbol) {
       // index of the alternate player
-      let altIndex = (playerIndex === 0) ? 1 : 0;
-      if(players[altIndex].symbol === symbol) {
+      const altIndex = (playerIndex === 0) ? 1 : 0;
+      const altPlayer = _getPlayer(altIndex);
+      if(altPlayer.symbol === symbol) {
         return true;
       }
       else {
         return false;
       }
+    }
+
+    return {
+      initState,
+      setPlayer1,
+      setPlayer2,
+      getPlayerName,
+      setComputerPlayer,
+      toggleTurnIndex,
+      resetTurnIndex,
+      getTurnIndex,
+      getCurrentTurnSymbol,
+      endGame,
+      startGame,
+      getGameOverState,
+      checkDuplicateSymbols
+    }
+  })();
+
+  const gameLogic = (() => {
+    const init = () => {
+      gameState.initState();
+
+      let resetBtn = document.querySelector("#reset-btn");
+      let startBtn = document.querySelector("#start-btn");
+      resetBtn.addEventListener("click", _handleReset);
+      startBtn.addEventListener("click", _handleStart);
+
+      window.addEventListener("click", _handleTileClick);
+      userInput.setFormPopUp();
+      userInput.setCloseListeners();
+      userInput.setSubmitListener();
+      gameSettings.setSettingListeners();
+    }
+
+
+    const _handleReset = () => {
+      displayController.resetDisplay();
+      gameBoard.resetBoard();
+      userInput.enableInput();
+      _enableStartBtn();
+
+      //game should not start until start button pressed
+      gameState.endGame();
+      gameState.resetTurnIndex();
+    }
+
+    const _handleStart = () => {
+      gameState.startGame();
+      userInput.disableInput();
+    }
+
+    const _disableStartBtn = () => {
+      let startButton = document.querySelector("#start-btn");
+      startButton.disabled = true;
+    }
+
+    const _enableStartBtn = () => {
+      let startButton = document.querySelector("#start-btn");
+      startButton.disabled = false;
     }
 
     /**
@@ -263,8 +336,8 @@ const gameBoard = (() => {
      */
     const _handleTileClick = (event) => {
       if (event.target.className === "tile" && event.target.textContent == "" &&
-        !gameOver) {
-        const symbol = _getCurrentTurnSymbol();
+        !gameState.getGameOverState()) {
+        const symbol = gameState.getCurrentTurnSymbol();
         const row = event.target.getAttribute("data-row");
         const col = event.target.getAttribute("data-col");
 
@@ -273,25 +346,17 @@ const gameBoard = (() => {
         let checkResult = _checkForWin();
         if (checkResult) {
           displayController.displayWinMessage(checkResult);
-          gameOver = true;
+          gameState.endGame();
           _disableStartBtn();
         }
         //tie condition
         else if (gameBoard.isBoardFull()) {
           displayController.displayTieMessage();
-          gameOver = true;
+          gameState.endGame();
           _disableStartBtn();
         }
-        currentTurnIndex = toggleTurnIndex();
+        gameState.toggleTurnIndex();
       }
-    }
-
-    const setPlayer = (index, player) => {
-      players[index] = player;
-    }
-
-    const setComputerPlayer = (bool) => {
-      players[1].computer = bool;
     }
 
     const _checkForWin = () => {
@@ -316,6 +381,14 @@ const gameBoard = (() => {
       }
     }
 
+    /**
+     * _checkIfSetWins
+     * Function to check to see if an array of 3 symbols are the same.
+     * 
+     * @param {set} array of 3 symbols
+     * @returns false -- if undefined or not 3 in a row
+     *          true -- if 3 symbols in a row
+     */
     const _checkIfSetWins = (set) => {
       if (set.includes(undefined)) {
         return false;
@@ -339,7 +412,7 @@ const gameBoard = (() => {
           checkedSet[col] = gameBoard.getBoardTile(row, col);
         }
         if (_checkIfSetWins(checkedSet)) {
-          return _getPlayerName(checkedSet[0]);
+          return gameState.getPlayerName(checkedSet[0]);
         }
       }
       return false;
@@ -361,7 +434,7 @@ const gameBoard = (() => {
           checkedSet[row] = gameBoard.getBoardTile(row, col);
         }
         if (_checkIfSetWins(checkedSet)) {
-          return _getPlayerName(checkedSet[0]);
+          return gameState.getPlayerName(checkedSet[0]);
         }
       }
       return false;
@@ -383,7 +456,7 @@ const gameBoard = (() => {
         checkedSet[diag] = gameBoard.getBoardTile(diag, diag);
       }
       if (_checkIfSetWins(checkedSet)) {
-        return _getPlayerName(checkedSet[0]);
+        return gameState.getPlayerName(checkedSet[0]);
       }
       return false;
     }
@@ -406,25 +479,13 @@ const gameBoard = (() => {
         col++;
       }
       if (_checkIfSetWins(checkedSet)) {
-        return _getPlayerName(checkedSet[0]);
+        return gameState.getPlayerName(checkedSet[0]);
       }
       return false;
     }
 
-    const _getPlayerName = (symbol) => {
-      for(let i = 0; i , players.length; i++) {
-        if(players[i].symbol === symbol) {
-          return players[i].name;
-        }
-      }
-    }
-
     return {
-      init,
-      setPlayer,
-      checkDuplicateSymbols,
-      toggleTurnIndex,
-      setComputerPlayer
+      init
     }
   })();
 
@@ -437,19 +498,18 @@ const gameBoard = (() => {
     const _handlePlayerType = () => {
       const computerInput = document.querySelector("#computer");
       if(computerInput.checked) {
-        gameLogic.setComputerPlayer(true);
+        gameState.setComputerPlayer(true);
       }
       else {
-        gameLogic.setComputerPlayer(false);
+        gameState.setComputerPlayer(false);
       }
     };
   
     const _handlePlayerTurn = () => {
       const firstTurnInput = document.querySelector("#first");
       if(firstTurnInput.checked && !firstTurnInput.disabled) {
-        console.log(firstTurnInput.disabled);
         //logic always starts at 0 in initial game state, toggle to set to 1
-        gameLogic.toggleTurnIndex();
+        gameState.toggleTurnIndex();
       }
     }
     return {
