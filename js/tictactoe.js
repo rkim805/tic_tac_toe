@@ -490,11 +490,19 @@ const ticTacToe = (() => {
   })();
 
   const gameSettings = (() => {
+
     const setSettingListeners = () => {
       const startButton = document.querySelector("#start-btn");
       startButton.addEventListener("click", _handlePlayerType);
-      startButton.addEventListener("click", _handlePlayerTurn);
+      startButton.addEventListener("click", _handleTurnSelection);
+
+      const computerRadioBtn = document.querySelector("#computer");
+      computerRadioBtn.addEventListener("click", _enableTurnSelection);
+
+      const localRadioBtn = document.querySelector("#local");
+      localRadioBtn.addEventListener("click", _disableTurnSelection);
     }
+
     const _handlePlayerType = () => {
       const computerInput = document.querySelector("#computer");
       if(computerInput.checked) {
@@ -504,14 +512,29 @@ const ticTacToe = (() => {
         gameState.setComputerPlayer(false);
       }
     };
+
+    const _enableTurnSelection = () => {
+      const turnSelectors = document.querySelectorAll(".turn-selection");
+      turnSelectors.forEach((selector) => {
+        selector.disabled = false;
+      });
+    };
+
+    const _disableTurnSelection = () => {
+      const turnSelectors = document.querySelectorAll(".turn-selection");
+      turnSelectors.forEach((selector) => {
+        selector.disabled = true;
+      });
+    };
   
-    const _handlePlayerTurn = () => {
-      const firstTurnInput = document.querySelector("#first");
-      if(firstTurnInput.checked && !firstTurnInput.disabled) {
-        //logic always starts at 0 in initial game state, toggle to set to 1
+    const _handleTurnSelection = () => {
+      const secondTurnInput = document.querySelector("#second");
+      if(secondTurnInput.checked && !secondTurnInput.disabled) {
+        //logic always starts at 0 before starting, toggle to set to 1
         gameState.toggleTurnIndex();
       }
-    }
+    };
+
     return {
       setSettingListeners
     }

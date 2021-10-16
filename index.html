@@ -28,14 +28,18 @@
     </div>
     <div id="settings-container">
       <p>Select your opponent:</p>
-      <input type="radio" name="altPlayerType" id="local" checked>
+      <input type="radio" name="altPlayerType" id="local" class="player-type"
+      checked>
       <label for="local">Local</label>
-      <input type="radio" name="altPlayerType" id="computer">
+      <input type="radio" name="altPlayerType" id="computer" 
+      class="player-type">
       <label for="computer">Computer</label>
       <br />
-      <input type="radio" name="playerTurn" id="first" checked disabled>
+      <input type="radio" name="playerTurn" id="first" class="turn-selection" 
+      checked disabled>
       <label for="local">First</label>
-      <input type="radio" name="playerTurn" id="second" disabled>
+      <input type="radio" name="playerTurn" id="second" class="turn-selection"
+       disabled>
       <label for="computer">Second</label>
     </div>
     <p id="game-status"> </p>
