@@ -335,8 +335,11 @@ const ticTacToe = (() => {
       userInput.setFormPopUp();
       userInput.setCloseListeners();
       userInput.setSubmitListener();
-      gameSettings.setSettingListeners();
       gameState.initState();
+      gameSettings.setSettingListeners();
+
+      //overwrite initState() if there are chosen settings
+      gameSettings.setSettings();
     }
 
 
