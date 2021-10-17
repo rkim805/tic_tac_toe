@@ -8,7 +8,9 @@ const ticTacToe = (() => {
 
   const displayController = (() => {
 
-    const displayTile = (tile, symbol) => {
+    const displayTile = (row, col, symbol) => {
+      const tile = document.
+      querySelector(`[data-row="${row}"][data-col="${col}"]`)
       tile.textContent = symbol;
     };
 
@@ -170,12 +172,25 @@ const ticTacToe = (() => {
     
     const getGridSize = () => GRID_SIZE;
 
+    const getEmptyTiles = () => {
+      const returnArr = [];
+      for (let row = 0; row < board.length; row++) {
+        for (let col = 0; col < board[row].length; col++) {
+          if (board[row][col] == undefined) {
+            returnArr.push({row, col});
+          }
+        }
+      }
+      return returnArr;
+    }
+
     return {
       setBoardTile,
       getBoardTile,
       isBoardFull,
       getGridSize,
-      resetBoard
+      resetBoard,
+      getEmptyTiles
     };
   })();
 
@@ -215,6 +230,10 @@ const ticTacToe = (() => {
       players[1].computer = bool;
     }
 
+    const usesComputer = () => {
+      return players[1].computer;
+    }
+
     const toggleTurnIndex = () => {
       currentTurnIndex = currentTurnIndex === 0 ? 1 : 0;
     }
@@ -225,6 +244,15 @@ const ticTacToe = (() => {
 
     const getCurrentTurnSymbol = () => {
       return players[currentTurnIndex].symbol;
+    }
+
+    const getComputerSymbol = () => {
+      if(currentTurnIndex === 0) {
+        return players[1].symbol;
+      }
+      else {
+        return players[0].symbol;
+      }
     }
 
     const getTurnIndex = () => {
@@ -270,10 +298,12 @@ const ticTacToe = (() => {
       setPlayer2,
       getPlayerName,
       setComputerPlayer,
+      usesComputer,
       toggleTurnIndex,
       resetTurnIndex,
       getTurnIndex,
       getCurrentTurnSymbol,
+      getComputerSymbol,
       endGame,
       startGame,
       getGameOverState,
@@ -340,9 +370,9 @@ const ticTacToe = (() => {
         const symbol = gameState.getCurrentTurnSymbol();
         const row = event.target.getAttribute("data-row");
         const col = event.target.getAttribute("data-col");
-
+ 
         gameBoard.setBoardTile(row, col, symbol);
-        displayController.displayTile(event.target, symbol);
+        displayController.displayTile(row, col, symbol);
         let checkResult = _checkForWin();
         if (checkResult) {
           displayController.displayWinMessage(checkResult);
@@ -355,8 +385,23 @@ const ticTacToe = (() => {
           gameState.endGame();
           _disableStartBtn();
         }
+        else if(gameState.usesComputer()) {
+          setTimeout(_randomComputerMove, 20);
+        } 
+        else {
         gameState.toggleTurnIndex();
+        }
       }
+    }
+
+    const _randomComputerMove = () => {
+      const emptyTiles = gameBoard.getEmptyTiles();
+      const randomIndex = Math.floor(Math.random() * (emptyTiles.length));
+      const rowColObj = emptyTiles[randomIndex];
+      gameBoard.setBoardTile(rowColObj.row, rowColObj.col, 
+        gameState.getComputerSymbol());
+      displayController.displayTile(rowColObj.row, rowColObj.col, 
+        gameState.getComputerSymbol());
     }
 
     const _checkForWin = () => {
