@@ -324,8 +324,7 @@ const ticTacToe = (() => {
 
   const gameLogic = (() => {
     const init = () => {
-      gameState.initState();
-      gameSettings.setSettings();
+      //gameSettings.setSettings();
 
       let resetBtn = document.querySelector("#reset-btn");
       let startBtn = document.querySelector("#start-btn");
@@ -337,6 +336,7 @@ const ticTacToe = (() => {
       userInput.setCloseListeners();
       userInput.setSubmitListener();
       gameSettings.setSettingListeners();
+      gameState.initState();
     }
 
 
@@ -345,20 +345,19 @@ const ticTacToe = (() => {
       gameBoard.resetBoard();
       userInput.enableInput();
 
-      //save settings after game reset
-      gameSettings.setSettings();
       _enableStartBtn();
 
       //game should not start until start button pressed
       gameState.endGame();
       gameState.resetTurnIndex();
+
+      //save settings after game reset
+      gameSettings.setSettings();
     }
 
     const _handleStart = () => {
       gameState.startGame();
       userInput.disableInput();
-      console.log(gameState.usesComputer());
-      console.log(gameState.getTurnIndex());
       if(gameState.usesComputer() && gameState.getTurnIndex() === 1) {
         _randomComputerMove();
       }
