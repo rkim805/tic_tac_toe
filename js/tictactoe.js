@@ -198,6 +198,7 @@ const ticTacToe = (() => {
     const players = [];
     let currentTurnIndex;
     let gameOver;
+    let impossibleAI;
 
     const initState = () => {
       players.push(playerFactory("Player 1", "X", false),
@@ -216,6 +217,14 @@ const ticTacToe = (() => {
 
     const _getPlayer = (index) => {
       return players[index];
+    }
+
+    const setImpossibleAI = (bool) => {
+      impossibleAI = bool;
+    }
+
+    const getImpossibleAI = () => {
+      return impossibleAI;
     }
 
     const getPlayerName = (symbol) => {
@@ -297,6 +306,8 @@ const ticTacToe = (() => {
       setPlayer1,
       setPlayer2,
       getPlayerName,
+      setImpossibleAI,
+      getImpossibleAI,
       setComputerPlayer,
       usesComputer,
       toggleTurnIndex,
@@ -314,6 +325,7 @@ const ticTacToe = (() => {
   const gameLogic = (() => {
     const init = () => {
       gameState.initState();
+      gameSettings.setSettings();
 
       let resetBtn = document.querySelector("#reset-btn");
       let startBtn = document.querySelector("#start-btn");
@@ -332,6 +344,9 @@ const ticTacToe = (() => {
       displayController.resetDisplay();
       gameBoard.resetBoard();
       userInput.enableInput();
+
+      //save settings after game reset
+      gameSettings.setSettings();
       _enableStartBtn();
 
       //game should not start until start button pressed
@@ -342,6 +357,11 @@ const ticTacToe = (() => {
     const _handleStart = () => {
       gameState.startGame();
       userInput.disableInput();
+      console.log(gameState.usesComputer());
+      console.log(gameState.getTurnIndex());
+      if(gameState.usesComputer() && gameState.getTurnIndex() === 1) {
+        _randomComputerMove();
+      }
     }
 
     const _disableStartBtn = () => {
@@ -446,7 +466,7 @@ const ticTacToe = (() => {
      * Function that iterates through each row of the board,
      * and sees if there are 3 of the same symbol in a row.
      * 
-     * @return _getPlayerName(checkedSet[0]) -- name of player who won
+     * @return getPlayerName(checkedSet[0]) -- name of player who won
      *         false  -- if diagonal is not 3 in a row
      */
     const _checkRowsForWin = () => {
@@ -468,7 +488,7 @@ const ticTacToe = (() => {
      * Function that iterates through each column of the board,
      * and sees if there are 3 of the same symbol in a row.
      * 
-     * @return _getPlayerName(checkedSet[0]) -- name of player who won
+     * @return getPlayerName(checkedSet[0]) -- name of player who won
      *         false  -- if diagonal is not 3 in a row
      */
     const _checkColsForWin = () => {
@@ -491,7 +511,7 @@ const ticTacToe = (() => {
      * board to the bottom right, to see if it is 3 of the same symbols in a
      * row.
      * 
-     * @return _getPlayerName(checkedSet[0]) -- name of player who won
+     * @return getPlayerName(checkedSet[0]) -- name of player who won
      *         false  -- if diagonal is not 3 in a row
      */
     const _checkDeclineDiagonal = () => {
@@ -512,7 +532,7 @@ const ticTacToe = (() => {
      * board to the top right, to see if it is 3 of the same symbols in a
      * row.
      * 
-     * @return _getPlayerName(checkedSet[0]) -- name of player who won
+     * @return getPlayerName(checkedSet[0]) -- name of player who won
      *         false  -- if diagonal is not 3 in a row
      */
     const _checkInclineDiagonal = () => {
@@ -536,52 +556,87 @@ const ticTacToe = (() => {
 
   const gameSettings = (() => {
 
-    const setSettingListeners = () => {
-      const startButton = document.querySelector("#start-btn");
-      startButton.addEventListener("click", _handlePlayerType);
-      startButton.addEventListener("click", _handleTurnSelection);
-
+    const setSettings = () => {
       const computerRadioBtn = document.querySelector("#computer");
-      computerRadioBtn.addEventListener("click", _enableTurnSelection);
-
-      const localRadioBtn = document.querySelector("#local");
-      localRadioBtn.addEventListener("click", _disableTurnSelection);
-    }
-
-    const _handlePlayerType = () => {
-      const computerInput = document.querySelector("#computer");
-      if(computerInput.checked) {
-        gameState.setComputerPlayer(true);
+      if(computerRadioBtn.checked && !computerRadioBtn.disabled) {
+        _setComputerPlayer();
       }
       else {
-        gameState.setComputerPlayer(false);
+        _setLocalPlayer();
       }
-    };
+      const secondRadioBtn = document.querySelector("#second");
+      if(secondRadioBtn.checked && !secondRadioBtn.disabled) {
+        gameState.toggleTurnIndex();
+      }
+      else {
+        gameState.resetTurnIndex();
+      }
+      const impossibleRadioBtn = document.querySelector("#impossible");
+      if(impossibleRadioBtn.checked && impossibleRadioBtn.disabled) {
+        _setDifficultyImpossible();
+      }
+      else {
+        _setDifficultyRandom();
+      }
+    }
 
-    const _enableTurnSelection = () => {
-      const turnSelectors = document.querySelectorAll(".turn-selection");
-      turnSelectors.forEach((selector) => {
+    const setSettingListeners = () => {
+      const computerRadioBtn = document.querySelector("#computer");
+      computerRadioBtn.addEventListener("click", _enableComputerSettings);
+      computerRadioBtn.addEventListener("click", _setComputerPlayer);
+
+      const localRadioBtn = document.querySelector("#local");
+      localRadioBtn.addEventListener("click", _disableComputerSettings);
+      localRadioBtn.addEventListener("click", _setLocalPlayer);
+
+      const firstRadioBtn = document.querySelector("#first");
+      firstRadioBtn.addEventListener("click", gameState.resetTurnIndex);
+      const secondRadioBtn = document.querySelector("#second");
+      secondRadioBtn.addEventListener("click", gameState.toggleTurnIndex);
+
+      const randomRadioBtn = document.querySelector("#random");
+      randomRadioBtn.addEventListener("click", _setDifficultyImpossible);
+      const impossibleRadioBtn = document.querySelector("#impossible");
+      impossibleRadioBtn.addEventListener("click", _setDifficultyRandom);
+    }
+
+    const _setComputerPlayer = () => {
+      gameState.setComputerPlayer(true);
+    }
+
+    const _setLocalPlayer = () => {
+      gameState.setComputerPlayer(false);
+    }
+
+    const _setDifficultyImpossible = () => {
+      gameState.setImpossibleAI(true);
+    }
+
+    const _setDifficultyRandom = () => {
+      gameState.setImpossibleAI(false);
+    }
+
+    const _enableComputerSettings = () => {
+      const computerSettings = document.querySelectorAll(`.turn-selection, 
+        .ai-selection`);
+
+      computerSettings.forEach((selector) => {
         selector.disabled = false;
       });
     };
 
-    const _disableTurnSelection = () => {
-      const turnSelectors = document.querySelectorAll(".turn-selection");
-      turnSelectors.forEach((selector) => {
+    const _disableComputerSettings = () => {
+      const computerSettings = document.querySelectorAll(`.turn-selection, 
+        .ai-selection`);
+
+      computerSettings.forEach((selector) => {
         selector.disabled = true;
       });
     };
   
-    const _handleTurnSelection = () => {
-      const secondTurnInput = document.querySelector("#second");
-      if(secondTurnInput.checked && !secondTurnInput.disabled) {
-        //logic always starts at 0 before starting, toggle to set to 1
-        gameState.toggleTurnIndex();
-      }
-    };
-
     return {
-      setSettingListeners
+      setSettingListeners,
+      setSettings
     }
   })();
 

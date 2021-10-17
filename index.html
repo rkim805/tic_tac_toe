@@ -34,13 +34,22 @@
       <input type="radio" name="altPlayerType" id="computer" 
       class="player-type">
       <label for="computer">Computer</label>
-      <br />
-      <input type="radio" name="playerTurn" id="first" class="turn-selection" 
-      checked disabled>
-      <label for="local">First</label>
-      <input type="radio" name="playerTurn" id="second" class="turn-selection"
-       disabled>
-      <label for="computer">Second</label>
+      <div class="game-settings">
+        <p>Game Settings: </p>
+        <input type="radio" name="playerTurn" id="first" class="turn-selection" 
+        checked disabled>
+        <label for="first">First</label>
+        <input type="radio" name="playerTurn" id="second" class="turn-selection"
+        disabled>
+        <label for="second">Second</label>
+        <br>
+        <input type="radio" name="ai-type" id="random" class="ai-selection" 
+        checked disabled>
+        <label for="random">Random</label>
+        <input type="radio" name="ai-type" id="impossible" class="ai-selection"
+        disabled>
+        <label for="impossible">Impossible</label>
+      </div>
     </div>
     <p id="game-status"> </p>
     <div class="modal">
