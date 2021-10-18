@@ -147,18 +147,22 @@ const ticTacToe = (() => {
     const GRID_SIZE = 3;
     let board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
 
-    const setBoardTile = (row, col, symbol) => {
-      board[row][col] = symbol;
+    const setBoardTile = (row, col, symbol, boardArg=board) => {
+      boardArg[row][col] = symbol;
     };
 
-    const getBoardTile = (row, col) => {
-      return board[row][col];
+    const getBoardTile = (row, col, boardArg=board) => {
+      return boardArg[row][col];
     };
 
-    const isBoardFull = () => {
-      for (let row = 0; row < board.length; row++) {
-        for (let col = 0; col < board[row].length; col++) {
-          if (board[row][col] == undefined) {
+    const getBoard = () => {
+      return [...board];
+    }
+
+    const isBoardFull = (boardArg=board) => {
+      for (let row = 0; row < boardArg.length; row++) {
+        for (let col = 0; col < boardArg[row].length; col++) {
+          if (boardArg[row][col] == undefined) {
             return false;
           }
         }
@@ -166,17 +170,17 @@ const ticTacToe = (() => {
       return true;
     }
 
-    const resetBoard = () => {
-      board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
+    const resetBoard = (boardArg=board) => {
+      boardArg = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
     }
     
     const getGridSize = () => GRID_SIZE;
 
-    const getEmptyTiles = () => {
+    const getEmptyTiles = (boardArg=board) => {
       const returnArr = [];
-      for (let row = 0; row < board.length; row++) {
-        for (let col = 0; col < board[row].length; col++) {
-          if (board[row][col] == undefined) {
+      for (let row = 0; row < boardArg.length; row++) {
+        for (let col = 0; col < boardArg[row].length; col++) {
+          if (boardArg[row][col] == undefined) {
             returnArr.push({row, col});
           }
         }
@@ -187,6 +191,7 @@ const ticTacToe = (() => {
     return {
       setBoardTile,
       getBoardTile,
+      getBoard,
       isBoardFull,
       getGridSize,
       resetBoard,
@@ -361,8 +366,14 @@ const ticTacToe = (() => {
     const _handleStart = () => {
       gameState.startGame();
       userInput.disableInput();
+      _disableStartBtn();
       if(gameState.usesComputer() && gameState.getTurnIndex() === 1) {
-        _randomComputerMove();
+        if(gameState.getImpossibleAI()) {
+          //TODO:
+        }
+        else {
+          _randomComputerMove();
+        }
       }
     }
 
@@ -395,23 +406,17 @@ const ticTacToe = (() => {
  
         gameBoard.setBoardTile(row, col, symbol);
         displayController.displayTile(row, col, symbol);
-        let checkResult = _checkForWin();
-        if (checkResult) {
-          displayController.displayWinMessage(checkResult);
-          gameState.endGame();
-          _disableStartBtn();
-        }
-        //tie condition
-        else if (gameBoard.isBoardFull()) {
-          displayController.displayTieMessage();
-          gameState.endGame();
-          _disableStartBtn();
-        }
-        else if(gameState.usesComputer()) {
-          setTimeout(_randomComputerMove, 20);
+        _checkGameEnd();
+        if(gameState.usesComputer()) {
+          if(gameState.getImpossibleAI()) {
+            console.log("test");
+          }
+          else {
+            setTimeout(_randomComputerMove, 20);
+          }
         } 
         else {
-        gameState.toggleTurnIndex();
+          gameState.toggleTurnIndex();
         }
       }
     }
@@ -420,10 +425,32 @@ const ticTacToe = (() => {
       const emptyTiles = gameBoard.getEmptyTiles();
       const randomIndex = Math.floor(Math.random() * (emptyTiles.length));
       const rowColObj = emptyTiles[randomIndex];
+      
       gameBoard.setBoardTile(rowColObj.row, rowColObj.col, 
         gameState.getComputerSymbol());
       displayController.displayTile(rowColObj.row, rowColObj.col, 
         gameState.getComputerSymbol());
+
+      _checkGameEnd();
+    }
+
+    const _bestComputerMove = () => {
+
+    }
+
+    const _checkGameEnd = () => {
+      let checkResult = _checkForWin();
+      if (checkResult) {
+        displayController.displayWinMessage(checkResult);
+        gameState.endGame();
+        _disableStartBtn();
+      }
+      //tie condition
+      else if (gameBoard.isBoardFull()) {
+        displayController.displayTieMessage();
+        gameState.endGame();
+        _disableStartBtn();
+      }
     }
 
     const _checkForWin = () => {
@@ -597,9 +624,9 @@ const ticTacToe = (() => {
       secondRadioBtn.addEventListener("click", gameState.toggleTurnIndex);
 
       const randomRadioBtn = document.querySelector("#random");
-      randomRadioBtn.addEventListener("click", _setDifficultyImpossible);
+      randomRadioBtn.addEventListener("click", _setDifficultyRandom);
       const impossibleRadioBtn = document.querySelector("#impossible");
-      impossibleRadioBtn.addEventListener("click", _setDifficultyRandom);
+      impossibleRadioBtn.addEventListener("click", _setDifficultyImpossible);
     }
 
     const _setComputerPlayer = () => {
