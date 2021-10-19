@@ -170,8 +170,8 @@ const ticTacToe = (() => {
       return true;
     }
 
-    const resetBoard = (boardArg=board) => {
-      boardArg = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
+    const resetBoard = () => {
+      board = [Array(GRID_SIZE), Array(GRID_SIZE), Array(GRID_SIZE)];
     }
     
     const getGridSize = () => GRID_SIZE;
@@ -407,7 +407,7 @@ const ticTacToe = (() => {
         gameBoard.setBoardTile(row, col, symbol);
         displayController.displayTile(row, col, symbol);
         _checkGameEnd();
-        if(gameState.usesComputer()) {
+        if(gameState.usesComputer() && !gameState.getGameOverState()) {
           if(gameState.getImpossibleAI()) {
             console.log("test");
           }
@@ -435,38 +435,55 @@ const ticTacToe = (() => {
     }
 
     const _bestComputerMove = () => {
-
+      const currentBoard = gameBoard.getBoard();
+      const numEmptyTiles = gameBoard.getEmptyTiles.length;
+      const playerTurn = gameState.getTurnIndex();
+      minimax(currentBoard, numEmptyTiles, playerTurn);
     }
 
-    const _checkGameEnd = () => {
-      let checkResult = _checkForWin();
+    const minimax = (boardNode, depth, goingSecond) => {
+      if(depth === 0) {
+      }
+      //minimizing player
+      if(goingSecond) {
+        let value = Number.NEGATIVE_INFINITY;
+        const emptyTiles = gameBoard.getEmptyTiles(currentBoard)
+      }
+      //maximizing player
+      else {
+        let value = Number.POSITIVE_INFINITY;
+      }
+    }
+
+    const _checkGameEnd = (board) => {
+      let checkResult = _checkForWin(board);
       if (checkResult) {
         displayController.displayWinMessage(checkResult);
         gameState.endGame();
         _disableStartBtn();
       }
       //tie condition
-      else if (gameBoard.isBoardFull()) {
+      else if (gameBoard.isBoardFull(board)) {
         displayController.displayTieMessage();
         gameState.endGame();
         _disableStartBtn();
       }
     }
 
-    const _checkForWin = () => {
-      const rowResult = _checkRowsForWin();
+    const _checkForWin = (board) => {
+      const rowResult = _checkRowsForWin(board);
       if (rowResult) {
         return rowResult;
       }
-      const colResult = _checkColsForWin();
+      const colResult = _checkColsForWin(board);
       if (colResult) {
         return colResult;
       }
-      const declineDiagResult = _checkDeclineDiagonal();
+      const declineDiagResult = _checkDeclineDiagonal(board);
       if (declineDiagResult) {
         return declineDiagResult;
       }
-      const inclineDiagResult = _checkInclineDiagonal();
+      const inclineDiagResult = _checkInclineDiagonal(board);
       if (inclineDiagResult) {
         return inclineDiagResult;
       }
@@ -498,12 +515,12 @@ const ticTacToe = (() => {
      * @return getPlayerName(checkedSet[0]) -- name of player who won
      *         false  -- if diagonal is not 3 in a row
      */
-    const _checkRowsForWin = () => {
+    const _checkRowsForWin = (board) => {
       const checkedSet = Array(3);
       const GRID_SIZE = gameBoard.getGridSize();
       for (let row = 0; row < GRID_SIZE; row++) {
         for (let col = 0; col < GRID_SIZE; col++) {
-          checkedSet[col] = gameBoard.getBoardTile(row, col);
+          checkedSet[col] = gameBoard.getBoardTile(row, col, board);
         }
         if (_checkIfSetWins(checkedSet)) {
           return gameState.getPlayerName(checkedSet[0]);
@@ -520,12 +537,12 @@ const ticTacToe = (() => {
      * @return getPlayerName(checkedSet[0]) -- name of player who won
      *         false  -- if diagonal is not 3 in a row
      */
-    const _checkColsForWin = () => {
+    const _checkColsForWin = (board) => {
       const checkedSet = Array(3);
       const GRID_SIZE = gameBoard.getGridSize();
       for (let col = 0; col < GRID_SIZE; col++) {
         for (let row = 0; row < GRID_SIZE; row++) {
-          checkedSet[row] = gameBoard.getBoardTile(row, col);
+          checkedSet[row] = gameBoard.getBoardTile(row, col, board);
         }
         if (_checkIfSetWins(checkedSet)) {
           return gameState.getPlayerName(checkedSet[0]);
@@ -543,11 +560,11 @@ const ticTacToe = (() => {
      * @return getPlayerName(checkedSet[0]) -- name of player who won
      *         false  -- if diagonal is not 3 in a row
      */
-    const _checkDeclineDiagonal = () => {
+    const _checkDeclineDiagonal = (board) => {
       const GRID_SIZE = gameBoard.getGridSize();
       const checkedSet = Array(GRID_SIZE);
       for (let diag = 0; diag < GRID_SIZE; diag++) {
-        checkedSet[diag] = gameBoard.getBoardTile(diag, diag);
+        checkedSet[diag] = gameBoard.getBoardTile(diag, diag, board);
       }
       if (_checkIfSetWins(checkedSet)) {
         return gameState.getPlayerName(checkedSet[0]);
@@ -564,12 +581,12 @@ const ticTacToe = (() => {
      * @return getPlayerName(checkedSet[0]) -- name of player who won
      *         false  -- if diagonal is not 3 in a row
      */
-    const _checkInclineDiagonal = () => {
+    const _checkInclineDiagonal = (board) => {
       let col = 0;
       const GRID_SIZE = gameBoard.getGridSize();
       const checkedSet = Array(GRID_SIZE);
       for (let row = GRID_SIZE - 1; row >= 0; row--) {
-        checkedSet[col] = gameBoard.getBoardTile(row, col);
+        checkedSet[col] = gameBoard.getBoardTile(row, col, board);
         col++;
       }
       if (_checkIfSetWins(checkedSet)) {
@@ -651,8 +668,8 @@ const ticTacToe = (() => {
 
       computerSettings.forEach((selector) => {
         selector.disabled = false;
-      });
-    };
+      })
+    }
 
     const _disableComputerSettings = () => {
       const computerSettings = document.querySelectorAll(`.turn-selection, 
@@ -660,8 +677,8 @@ const ticTacToe = (() => {
 
       computerSettings.forEach((selector) => {
         selector.disabled = true;
-      });
-    };
+      })
+    }
   
     return {
       setSettingListeners,
