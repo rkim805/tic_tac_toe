@@ -155,8 +155,16 @@ const ticTacToe = (() => {
       return boardArg[row][col];
     };
 
+    const copyBoard = (boardArg) => {
+      const newBoard = []
+      for(let i = 0; i < boardArg.length; i++) {
+        newBoard[i] = [...boardArg[i]];
+      }
+      return newBoard;
+    }
+
     const getBoard = () => {
-      return [...board];
+      return board;
     }
 
     const isBoardFull = (boardArg=board) => {
@@ -192,6 +200,7 @@ const ticTacToe = (() => {
       setBoardTile,
       getBoardTile,
       getBoard,
+      copyBoard,
       isBoardFull,
       getGridSize,
       resetBoard,
@@ -444,90 +453,87 @@ const ticTacToe = (() => {
 
     const _bestComputerMove = () => {
       const currentBoard = gameBoard.getBoard();
-      const numEmptyTiles = gameBoard.getEmptyTiles().length;
       const playerTurn = gameState.getTurnIndex();
 
-      const bestMoveObj = minimax(currentBoard, numEmptyTiles, playerTurn);
-      console.log(bestMoveObj);
+      const bestMoveObj = minimax(currentBoard, !playerTurn);
+      gameBoard.setBoardTile(bestMoveObj.row, bestMoveObj.col, 
+        gameState.getComputerSymbol());
+      displayController.displayTile(bestMoveObj.row, bestMoveObj.col, 
+        gameState.getComputerSymbol());
+
+      _checkGameEnd();
     }
 
-    const minimax = (boardNode, depth, goingSecond) => {
-      if(depth === 0) {
-        const winningSymbol = _checkForWin(boardNode);
-        //if there was a win
-        if(winningSymbol !== undefined) {
-          if(winningSymbol === gameState.getComputerSymbol()) {
-            return {value: -1};
-          }
-          else {
-            return {value: 1};
-          }
+    const minimax = (boardNode, computerGoesSecond) => {
+      const winningSymbol = _checkForWin(boardNode);
+      //if there was a win
+      if(winningSymbol) {
+        if(computerGoesSecond) {
+          return {value: 1};
         }
-        //else tie
         else {
-          return {value: 0};
+          return {value: -1};
         }
       }
+      //else if tie
+      else if(gameBoard.isBoardFull(boardNode)) {
+        return {value: 0};
+      }
       const emptyTiles = gameBoard.getEmptyTiles(boardNode);
-      const nextMoveValues = [];
       
-      //get symbol for this iteration of simulated game;
-      let currentNode = boardNode;
+      let currentNode = gameBoard.copyBoard(boardNode);
 
       //minimizing player(player who went second)
-      if(goingSecond) {
+      if(computerGoesSecond) {
         const symbol = gameState.getPlayerSymbol(1);
-        let value = {value: Number.POSITIVE_INFINITY};
+        let bestMove = {value: Number.POSITIVE_INFINITY};
         for(let i = 0; i < emptyTiles.length; i++) {
-          let newBoard = gameBoard.setBoardTile(emptyTiles[i].row, 
-            emptyTiles[i].col, symbol, currentNode);
-          currentNode = boardNode;
+          currentNode[emptyTiles[i].row][emptyTiles[i].col] = symbol;
 
-          //save row/col to return move, toggle goingSecond since next
-          //player's turn
-          let moveData = {value: minimax(newBoard, depth - 1, !goingSecond),
-            row: emptyTiles[i].row, col: emptyTiles[i].col};
-          nextMoveValues.push(moveData);
+          //save row/col to return best move, toggle computerGoesSecond since 
+          //next player's turn
+          const leafData = minimax(currentNode, !computerGoesSecond);
+          let moveData = {
+            value: leafData.value, 
+            row: emptyTiles[i].row, 
+            col: emptyTiles[i].col
+          };
+          if(moveData.value < bestMove.value) {
+            bestMove = moveData;
+          }
+          else if(moveData.value === bestMove.value) {
+            bestMove = Math.random() < 0.5 ? bestMove : moveData;
+          }
+          //copy back to original board state
+          currentNode = gameBoard.copyBoard(boardNode);
         }
-        value = nextMoveValues.reduce(_getMinValue);
-        return value;
+        return bestMove;
       }
       //maximizing player(player who went first)
       else {
         const symbol = gameState.getPlayerSymbol(0);
-        let value = {value: Number.NEGATIVE_INFINITY};
+        let bestMove = {value: Number.NEGATIVE_INFINITY};
         for(let i = 0; i < emptyTiles.length; i++) {
-          let newBoard = gameBoard.setBoardTile(emptyTiles[i].row, 
-            emptyTiles[i].col, symbol, currentNode);
-          currentNode = boardNode;
+          currentNode[emptyTiles[i].row][emptyTiles[i].col] = symbol;
 
-          //save row/col to return move, toggle goingSecond since next
-          //player's turn
-          let moveData = {value: minimax(newBoard, depth - 1, !goingSecond),
-          row: emptyTiles[i].row, col: emptyTiles[i].col};
-          nextMoveValues.push(moveData);
+          //save row/col to return best move, toggle computerGoesSecond since
+          //next player's turn
+          const leafData = minimax(currentNode, !computerGoesSecond);
+          let moveData = {
+            value: leafData.value, 
+            row: emptyTiles[i].row, 
+            col: emptyTiles[i].col
+          };
+          if(moveData.value > bestMove.value) {
+            bestMove = moveData;
+          }
+          else if(moveData.value === bestMove.value) {
+            bestMove = Math.random() < 0.5 ? bestMove : moveData;
+          }
+          //copy back to original board state by value
+          currentNode = gameBoard.copyBoard(boardNode);
         }
-        value = nextMoveValues.reduce(_getMaxValue);
-        return value;
-      }
-    }
-
-    const _getMinValue = (a, b) => {
-      if(a.value < b.value) {
-        return a;
-      }
-      else {
-        return b;
-      }
-    }
-
-    
-    const _getMaxValue = (a, b) => {
-      if(a.value > b.value) {
-        return a;
-      }
-      else {
-        return b;
+        return bestMove;
       }
     }
 
